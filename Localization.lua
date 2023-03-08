@@ -129,11 +129,12 @@ BCS["L"] = {
 	
 	["SPELL_MANA_REGEN_TOOLTIP"] = [[|cffffffffMana regen: %d |cffBF40BF(%d)|r
 	Mana regen when not casting and |cffBF40BF(while casting)|r.
-	Mana Regenerates every 2 seconds and the amount
+	Mana regenerates every 2 seconds and the amount
 	is dependent on your total spirit and MP5.
 	Spirit Regen: |cff7DF9FF%d|r
-	MP5 Regen (2s): |cff20ff20%d|r
-	Total +MP5: |cff20ff20%d|r]],
+	%%Regen while casting: |cffBF40BF%d%%|r
+	MP5 Regen: |cff20ff20%d|r
+	MP5 Regen (2s): |cff20ff20%d|r]],
 	
 	["ROGUE_MELEE_HIT_TOOLTIP"] = [[
 +5% hit to always hit enemy players.

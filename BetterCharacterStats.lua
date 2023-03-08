@@ -590,11 +590,14 @@ function BCS:SetManaRegen(statFrame)
 	local label = getglobal(statFrame:GetName() .. "Label")
 	
 	local base, casting, mp5 = BCS:GetManaRegen()
+	local mp2 = mp5*0.4
+	local totalRegen = base + mp2
+	local totalRegenWhileCasting = (casting/100)*base + mp2
 	
 	label:SetText(L.MANA_REGEN_COLON)
-	text:SetText(format("%d |cffBF40BF(%d)|r", base+mp5/2.5, casting))
+	text:SetText(format("%d |cffBF40BF(%d)|r", totalRegen, totalRegenWhileCasting))
 	
-	frame.tooltip = format(L.SPELL_MANA_REGEN_TOOLTIP, (base+(mp5/2.5)), casting, base, mp5/2.5, mp5)
+	frame.tooltip = format(L.SPELL_MANA_REGEN_TOOLTIP, totalRegen, totalRegenWhileCasting, base, casting, mp5, mp2)
 	
 	frame:SetScript("OnEnter", function()
 		GameTooltip:SetOwner(this, "ANCHOR_RIGHT")

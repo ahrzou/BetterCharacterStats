@@ -920,12 +920,9 @@ local function GetRegenMPPerSpirit()
 end
 
 function BCS:GetManaRegen()
-	local base
-	local casting = 0;
-	local power_regen = GetRegenMPPerSpirit()
-	base = power_regen
-	local mp5 = 0;
-	local mp5set = 0;
+	local base = GetRegenMPPerSpirit()
+	local casting = 0
+	local mp5 = 0
 	local mp5_Set_Bonus = {}
 	local MAX_INVENTORY_SLOTS = 19
 	
@@ -967,15 +964,19 @@ function BCS:GetManaRegen()
 					if value then
 						mp5 = mp5 + 4
 					end
-
 					_,_, value = strfind(left:GetText(), "(.+) %(%d/%d%)")
 					if value then
 						SET_NAME = value
 					end
-					_, _, value = strfind(left:GetText(), L["^Set: Allows (%d+)%% of your Mana regeneration to continue while casting."])
+					_,_, value = strfind(left:GetText(), L["^Set: Allows (%d+)%% of your Mana regeneration to continue while casting."])
 					if value and SET_NAME and not tContains(mp5_Set_Bonus, SET_NAME) then
 						tinsert(mp5_Set_Bonus, SET_NAME)
-						mp5set = mp5/2.5 + floor(((tonumber(value) / 100) * base))
+						casting = casting + tonumber(value)
+					end
+					_,_, value = strfind(left:GetText(), "^Set: Restores (%d+) mana per 5 sec.")
+					if value and SET_NAME and not tContains(mp5_Set_Bonus, SET_NAME) then
+						tinsert(mp5_Set_Bonus, SET_NAME)
+						mp5 = mp5 + tonumber(value)
 					end
 				end
 			end
@@ -995,26 +996,11 @@ function BCS:GetManaRegen()
 			for line=1, MAX_LINES do
 				local left = getglobal(BCS_Prefix .. "TextLeft" .. line)
 				if left:GetText() then
-					-- Priest
-					-- Meditation
+					-- Priest (Meditation) / Druid (Reflection)
 					local _,_, value = strfind(left:GetText(), L["Allows (%d+)%% of your Mana regeneration to continue while casting."])
 					local name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tab, talent)
 					if value and rank > 0 then
-						if mp5set > 0 then
-						local stat, effectiveStat = UnitStat("player", 5)
-						casting = mp5set + mp5/2.5 + floor(((tonumber(value) / 100) * base))
-						-- nothing more is currenlty supported, break out of the loops
-						line = MAX_LINES
-						talent = MAX_TALENTS
-						tab = MAX_TABS
-						else 
-						local stat, effectiveStat = UnitStat("player", 5)
-						casting = mp5/2.5 + floor(((tonumber(value) / 100) * base))
-						-- nothing more is currenlty supported, break out of the loops
-						line = MAX_LINES
-						talent = MAX_TALENTS
-						tab = MAX_TABS
-						end
+						casting = casting + tonumber(value)
 					end
 				end	
 			end
@@ -1032,36 +1018,34 @@ function BCS:GetManaRegen()
 	 _, _, mp5FromAura = BCS:GetPlayerAura(L["Restores (%d+) mana per 5 sec."])
 	if mp5FromAura then
 		mp5 = mp5 + tonumber(mp5FromAura)
-		casting = casting + tonumber(mp5FromAura)/2.5
 	end
 	--Nightfin Soup 
 	 _, _, mp5FromAura = BCS:GetPlayerAura(L["Regenerating (%d+) Mana every 5 seconds."])
 	if mp5FromAura then
 		mp5 = mp5 + tonumber(mp5FromAura)*2.5 -- had to double the mp5FromAura because the item is a true mp5 tick
-		casting = casting + tonumber(mp5FromAura) ---- had to not divide mp5FromAura because the item is a true mp5 tick
 	end
 	--Mageblood Potion 
 	 _, _, mp5FromAura = BCS:GetPlayerAura(L["Regenerate (%d+) mana per 5 sec."])
 	if mp5FromAura then
 		mp5 = mp5 + tonumber(mp5FromAura)
-		casting = casting + tonumber(mp5FromAura)/2.5
 	end
 	--Fizzy Energy Drink and Sagefin
 	 _, _, mp5FromAura = BCS:GetPlayerAura(L["Mana Regeneration increased by (%d+) every 5 seconds."])
 	if mp5FromAura then
 		mp5 = mp5 + tonumber(mp5FromAura)*2.5
-		casting = casting + tonumber(mp5FromAura)
 	end
 	--Second Wind
 	 _, _, mp5FromAura = BCS:GetPlayerAura(L["Restores (%d+) mana every 1 sec."])
 	if mp5FromAura then
 		mp5 = mp5 + tonumber(mp5FromAura)*5 -- had to multiply by 5 the mp5FromAura because the item is a sec per tick
-		casting = casting + tonumber(mp5FromAura)*2 ---- had to multiply by 2 the mp5FromAura because the item is a sec per tick
 	end
 	--Aura of the blue dragon
-	 _, _, mp5FromAura = BCS:GetPlayerAura(L["(%d+)%% of your Mana regeneration continuing while casting."])
+	 _, _, castingFromAura = BCS:GetPlayerAura(L["(%d+)%% of your Mana regeneration continuing while casting."])
 	if mp5FromAura then
-		casting = base+mp5/2.5 
+		casting = casting + tonumber(castingFromAura)
+	end
+	if casting > 100 then
+		casting = 100
 	end
 	return base, casting, mp5
 end
