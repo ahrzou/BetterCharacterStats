@@ -964,6 +964,10 @@ function BCS:GetManaRegen()
 					if value then
 						mp5 = mp5 + 4
 					end
+					_,_, value = strfind(left:GetText(), "^Equip: Allows (%d+)%% of your Mana regeneration to continue while casting.")
+					if value then
+						casting = casting + tonumber(value)
+					end
 					_,_, value = strfind(left:GetText(), "(.+) %(%d/%d%)")
 					if value then
 						SET_NAME = value
